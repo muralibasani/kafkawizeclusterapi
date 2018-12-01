@@ -1,0 +1,1 @@
+KafkaWize ClusterApi application.  It is required to run KafkaWize
