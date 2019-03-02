@@ -1,11 +1,9 @@
-package com.kafkamgt.clusterapi;
+package com.kafkamgt.clusterapi.services;
 
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.KafkaException;
-import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.acl.*;
 import org.apache.kafka.common.resource.Resource;
-import org.apache.kafka.common.resource.ResourceFilter;
 import org.apache.kafka.common.resource.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,26 +12,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
-@Component
-public class KafkaTopics {
+@Service
+public class ManageKafkaComponents {
 
-    private static Logger LOG = LoggerFactory.getLogger(KafkaTopics.class);
+    private static Logger LOG = LoggerFactory.getLogger(ManageKafkaComponents.class);
 
     String BOOTSTRAP_SERVERS=".bootstrap.servers";
 
-    @Value("${dev.schemaregistry.url}")
-    String schemaRegistryUrl;
+//    @Value("${dev.schemaregistry.url}")
+//    String schemaRegistryUrl;
 
     @Autowired
     Environment env;

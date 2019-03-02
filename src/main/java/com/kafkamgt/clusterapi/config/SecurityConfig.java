@@ -1,4 +1,4 @@
-package com.kafkamgt.clusterapi;
+package com.kafkamgt.clusterapi.config;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
