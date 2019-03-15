@@ -42,20 +42,18 @@ public class ManageKafkaComponents {
             AclBindingFilter aclBindingFilter = AclBindingFilter.ANY;
             DescribeAclsResult s = client.describeAcls(aclBindingFilter);
 
-            //HashMap<String,String> aclbindingMap = new HashMap<>();
-
-            try {
+             try {
                 s.values().get().stream().forEach(aclBinding -> {
-                    LOG.info(aclBinding+" ---- aclBinding");
+                    //LOG.info(aclBinding+" ---- aclBinding");
                     HashMap<String,String> aclbindingMap = new HashMap<>();
                     aclbindingMap.put("host",aclBinding.entry().host());
                     aclbindingMap.put("principle",aclBinding.entry().principal());
                     aclbindingMap.put("operation",aclBinding.entry().operation().toString());
                     aclbindingMap.put("permissionType",aclBinding.entry().permissionType().toString());
-                    aclbindingMap.put("resourceType",aclBinding.resource().resourceType().toString());
-                    aclbindingMap.put("resourceName",aclBinding.resource().name());
+                    aclbindingMap.put("resourceType",aclBinding.pattern().resourceType().toString());
+                    aclbindingMap.put("resourceName",aclBinding.pattern().name());
 
-                    if(!aclBinding.resource().resourceType().toString().equals("CLUSTER")) {
+                    if(!aclBinding.pattern().resourceType().toString().equals("CLUSTER")) {
                         if(aclBinding.entry().operation().toString().equals("WRITE") ||
                                 aclBinding.entry().operation().toString().equals("READ"))
                         acls.add(aclbindingMap);
