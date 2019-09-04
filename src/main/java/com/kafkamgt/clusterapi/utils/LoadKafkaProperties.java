@@ -30,7 +30,6 @@ public class LoadKafkaProperties {
         props.put(AdminClientConfig.CLIENT_ID_CONFIG,"testclient");
         props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG,"1000000");
 
-
         return props;
     }
 }
