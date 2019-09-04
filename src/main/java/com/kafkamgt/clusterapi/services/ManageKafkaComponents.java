@@ -24,11 +24,6 @@ public class ManageKafkaComponents {
 
     private static Logger LOG = LoggerFactory.getLogger(ManageKafkaComponents.class);
 
-    String BOOTSTRAP_SERVERS=".bootstrap.servers";
-
-//    @Value("${dev.schemaregistry.url}")
-//    String schemaRegistryUrl;
-
     @Autowired
     Environment env;
 
@@ -69,13 +64,10 @@ public class ManageKafkaComponents {
         }
 
         public Set<String> loadTopics(String environment){
-            List<String> topicList = new ArrayList<>();
             Properties props = new Properties();
-            //props.put("bootstrap.servers",env.getProperty(environment+BOOTSTRAP_SERVERS));
             props.put("bootstrap.servers",environment);
 
             AdminClient client = AdminClient.create(props);
-
             ListTopicsResult topicsResult = client.listTopics();
             Set<String> topics = new HashSet<>();
             try {
@@ -277,7 +269,6 @@ public class ManageKafkaComponents {
     public String postSchema(String topicName, String schema, String environmentVal){
             try {
                 String uri = env.getProperty(environmentVal+".schemaregistry.url") + "/subjects/" + topicName + "-value/versions";
-                LOG.info("URI is:::" + uri);
                 RestTemplate restTemplate = new RestTemplate();
 
                 Map<String, String> params = new HashMap<String, String>();
@@ -289,21 +280,16 @@ public class ManageKafkaComponents {
 
                 HttpEntity<Map<String, String>> request = new HttpEntity<Map<String, String>>(params, headers);
 
-                LOG.info("Before...");
                 ResponseEntity<String> responseNew = restTemplate.postForEntity(uri, request, String.class);
 
-                LOG.info("After..."+responseNew);
-
                 String updateTopicReqStatus = responseNew.getBody();
-                LOG.info(responseNew + "---Schema result -- " + updateTopicReqStatus);
 
-                    return updateTopicReqStatus;
+                return updateTopicReqStatus;
 
             }
             catch(Exception e){
                 return e.getMessage();
             }
-        //return "success";
     }
 
 }
