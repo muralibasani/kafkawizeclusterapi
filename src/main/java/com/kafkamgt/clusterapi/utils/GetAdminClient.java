@@ -1,13 +1,20 @@
 package com.kafkamgt.clusterapi.utils;
 
 import org.apache.kafka.clients.CommonClientConfigs;
+import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.Properties;
 
-@Component
-public class LoadKafkaProperties {
+@Service
+public class GetAdminClient {
+
+    public AdminClient getPlainAdminClient(String env){
+
+        return AdminClient.create(getPlainProperties(env));
+    }
+
     public Properties getPlainProperties(String environment){
         Properties props = new Properties();
 

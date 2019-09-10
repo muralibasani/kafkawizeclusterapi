@@ -1,5 +1,6 @@
 package com.kafkamgt.clusterapi.services;
 
+import com.kafkamgt.clusterapi.utils.GetAdminClient;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.acl.*;
@@ -8,7 +9,6 @@ import org.apache.kafka.common.resource.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,12 +27,13 @@ public class ManageKafkaComponents {
     @Autowired
     Environment env;
 
+    @Autowired
+    GetAdminClient getAdminClient;
+
         public Set<HashMap<String,String>> loadAcls(String environment){
             Set<HashMap<String,String>> acls = new HashSet<>();
-            Properties props = new Properties();
-            props.put("bootstrap.servers",environment);
 
-            AdminClient client = AdminClient.create(props);
+            AdminClient client = getAdminClient.getPlainAdminClient(environment);
 
             AclBindingFilter aclBindingFilter = AclBindingFilter.ANY;
             DescribeAclsResult s = client.describeAcls(aclBindingFilter);
@@ -64,10 +65,7 @@ public class ManageKafkaComponents {
         }
 
         public Set<String> loadTopics(String environment){
-            Properties props = new Properties();
-            props.put("bootstrap.servers",environment);
-
-            AdminClient client = AdminClient.create(props);
+            AdminClient client = getAdminClient.getPlainAdminClient(environment);
             ListTopicsResult topicsResult = client.listTopics();
             Set<String> topics = new HashSet<>();
             try {
@@ -97,15 +95,11 @@ public class ManageKafkaComponents {
 
     public String createTopic(String name, String partitions, String replicationFactor, String environment, String acl_ip, String acl_ssl) {
 
-            LOG.info(name + "--"+partitions + "--"+replicationFactor + "--" + environment);
-        Properties props = new Properties();
-        //props.put("bootstrap.servers",env.getProperty(environment+BOOTSTRAP_SERVERS));
-        props.put("bootstrap.servers",environment);
-        try (AdminClient client = AdminClient.create(props)) {
+        LOG.info(name + "--"+partitions + "--"+replicationFactor + "--" + environment);
 
-            NewTopic topic = null;
+        try (AdminClient client = getAdminClient.getPlainAdminClient(environment)) {
 
-            topic = new NewTopic(name, Integer.parseInt(partitions), Short.parseShort(replicationFactor));
+            NewTopic topic = new NewTopic(name, Integer.parseInt(partitions), Short.parseShort(replicationFactor));
 
             CreateTopicsResult result = client.createTopics(Collections.singletonList(topic));
             result.values().get(name).get();
@@ -136,12 +130,9 @@ public class ManageKafkaComponents {
 
     public String createProducerAcl(String topicName, String environment, String acl_ip, String acl_ssl) {
 
-        Properties props = new Properties();
         LOG.info("In producer alcs::"+acl_ip +"--"+ acl_ssl);
-        //props.put("bootstrap.servers",env.getProperty(environment+BOOTSTRAP_SERVERS));
-        props.put("bootstrap.servers",environment);
 
-        try (AdminClient client = AdminClient.create(props)) {
+        try (AdminClient client = getAdminClient.getPlainAdminClient(environment)) {
             List<AclBinding> aclListArray = new ArrayList<AclBinding>();
             String host = null, principal=null;
             if(acl_ssl!=null  && acl_ssl.trim().length()>0){
@@ -201,11 +192,7 @@ public class ManageKafkaComponents {
 
     public String createConsumerAcl(String topicName, String environment, String acl_ip, String acl_ssl, String consumerGroup) {
 
-        Properties props = new Properties();
-        //props.put("bootstrap.servers",env.getProperty(environment+BOOTSTRAP_SERVERS));
-        props.put("bootstrap.servers",environment);
-
-        try (AdminClient client = AdminClient.create(props)) {
+        try (AdminClient client = getAdminClient.getPlainAdminClient(environment)) {
             List<AclBinding> aclListArray = new ArrayList<AclBinding>();
             String host = null, principal=null;
 
