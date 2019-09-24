@@ -40,9 +40,7 @@ public class ClusterApiController {
                 topicRequest.get("topicName").get(0),
                 topicRequest.get("partitions").get(0),
                 topicRequest.get("rf").get(0),
-                topicRequest.get("env").get(0),
-                topicRequest.get("acl_ip").get(0),
-                topicRequest.get("acl_ssl").get(0)
+                topicRequest.get("env").get(0)
             );
 
         return new ResponseEntity<String>("success", HttpStatus.OK);

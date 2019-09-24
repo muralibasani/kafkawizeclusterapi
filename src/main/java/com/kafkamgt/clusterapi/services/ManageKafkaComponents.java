@@ -33,7 +33,7 @@ public class ManageKafkaComponents {
         public Set<HashMap<String,String>> loadAcls(String environment){
             Set<HashMap<String,String>> acls = new HashSet<>();
 
-            AdminClient client = getAdminClient.getPlainAdminClient(environment);
+            AdminClient client = getAdminClient.getAdminClient(environment);
 
             AclBindingFilter aclBindingFilter = AclBindingFilter.ANY;
             DescribeAclsResult s = client.describeAcls(aclBindingFilter);
@@ -65,7 +65,7 @@ public class ManageKafkaComponents {
         }
 
         public Set<String> loadTopics(String environment){
-            AdminClient client = getAdminClient.getPlainAdminClient(environment);
+            AdminClient client = getAdminClient.getAdminClient(environment);
             ListTopicsResult topicsResult = client.listTopics();
             Set<String> topics = new HashSet<>();
             try {
@@ -93,11 +93,11 @@ public class ManageKafkaComponents {
 
         }
 
-    public String createTopic(String name, String partitions, String replicationFactor, String environment, String acl_ip, String acl_ssl) {
+    public String createTopic(String name, String partitions, String replicationFactor, String environment) {
 
         LOG.info(name + "--"+partitions + "--"+replicationFactor + "--" + environment);
 
-        try (AdminClient client = getAdminClient.getPlainAdminClient(environment)) {
+        try (AdminClient client = getAdminClient.getAdminClient(environment)) {
 
             NewTopic topic = new NewTopic(name, Integer.parseInt(partitions), Short.parseShort(replicationFactor));
 
@@ -123,7 +123,7 @@ public class ManageKafkaComponents {
             LOG.error("Unable to create topic {}", name, e);
         }
 
-        createProducerAcl(name,environment,acl_ip,acl_ssl);
+        //createProducerAcl(name,environment,acl_ip,acl_ssl);
         return "success";
 
     }
@@ -132,7 +132,7 @@ public class ManageKafkaComponents {
 
         LOG.info("In producer alcs::"+acl_ip +"--"+ acl_ssl);
 
-        try (AdminClient client = getAdminClient.getPlainAdminClient(environment)) {
+        try (AdminClient client = getAdminClient.getAdminClient(environment)) {
             List<AclBinding> aclListArray = new ArrayList<AclBinding>();
             String host = null, principal=null;
             if(acl_ssl!=null  && acl_ssl.trim().length()>0){
@@ -192,7 +192,7 @@ public class ManageKafkaComponents {
 
     public String createConsumerAcl(String topicName, String environment, String acl_ip, String acl_ssl, String consumerGroup) {
 
-        try (AdminClient client = getAdminClient.getPlainAdminClient(environment)) {
+        try (AdminClient client = getAdminClient.getAdminClient(environment)) {
             List<AclBinding> aclListArray = new ArrayList<AclBinding>();
             String host = null, principal=null;
 
