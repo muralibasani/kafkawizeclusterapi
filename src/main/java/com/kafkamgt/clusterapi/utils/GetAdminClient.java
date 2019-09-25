@@ -19,7 +19,7 @@ public class GetAdminClient {
     public AdminClient getAdminClient(String envHost){
 
         String envOnlyHost = envHost.substring(0,envHost.indexOf(":"));
-        String ssl_acl_enabled = env.getProperty(envOnlyHost+".ssl_acl.enabled");
+        String ssl_acl_enabled = env.getProperty(envOnlyHost+".connect_with_ssl_kafkacluster");
         if(ssl_acl_enabled==null)
             return AdminClient.create(getPlainProperties(envHost));
         else if(ssl_acl_enabled!=null && ssl_acl_enabled.equals("true"))
