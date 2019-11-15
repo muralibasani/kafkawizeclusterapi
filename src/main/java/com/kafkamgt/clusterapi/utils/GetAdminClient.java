@@ -33,6 +33,9 @@ public class GetAdminClient {
 
         props.put("bootstrap.servers",environment);
 
+        props.put(AdminClientConfig.RETRIES_CONFIG,"3" );
+        props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG,"5000" );
+
         return props;
     }
 
@@ -52,6 +55,9 @@ public class GetAdminClient {
         props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG,"SSL");
         props.put(AdminClientConfig.CLIENT_ID_CONFIG,"testclient");
         props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG,"1000000");
+
+        props.put(AdminClientConfig.RETRIES_CONFIG,"3" );
+        props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG,"5000" );
 
         return props;
     }
