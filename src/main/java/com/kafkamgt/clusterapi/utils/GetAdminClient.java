@@ -33,8 +33,10 @@ public class GetAdminClient {
 
         props.put("bootstrap.servers",environment);
 
-        props.put(AdminClientConfig.RETRIES_CONFIG,"3" );
+        props.put(AdminClientConfig.RETRIES_CONFIG,"2" );
         props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG,"5000" );
+        props.put(AdminClientConfig.RETRY_BACKOFF_MS_CONFIG,"5000" );
+
 
         return props;
     }

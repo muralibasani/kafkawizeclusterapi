@@ -20,6 +20,19 @@ public class ClusterApiController {
     @Autowired
     ManageKafkaComponents kafkaTopics;
 
+    @RequestMapping(value = "/getApiStatus", method = RequestMethod.GET,produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<String> getApiStatus(){
+
+        return new ResponseEntity<>("ONLINE", HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/getStatus/{env}", method = RequestMethod.GET,produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<String> getStatus(@PathVariable String env){
+        String envStatus = kafkaTopics.getStatus(env);
+
+        return new ResponseEntity<>(envStatus, HttpStatus.OK);
+    }
+
     @RequestMapping(value = "/getTopics/{env}", method = RequestMethod.GET,produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Set<String>> getTopics(@PathVariable String env){
         Set<String> topics = kafkaTopics.loadTopics(env);

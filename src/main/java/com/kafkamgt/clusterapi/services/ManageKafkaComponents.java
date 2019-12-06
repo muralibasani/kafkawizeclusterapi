@@ -30,39 +30,59 @@ public class ManageKafkaComponents {
     @Autowired
     GetAdminClient getAdminClient;
 
-        public Set<HashMap<String,String>> loadAcls(String environment){
-            Set<HashMap<String,String>> acls = new HashSet<>();
+    public String getStatus(String environment){
 
+        try {
             AdminClient client = getAdminClient.getAdminClient(environment);
-
-            AclBindingFilter aclBindingFilter = AclBindingFilter.ANY;
-            DescribeAclsResult s = client.describeAcls(aclBindingFilter);
-
-             try {
-                s.values().get().stream().forEach(aclBinding -> {
-                    //LOG.info(aclBinding+" ---- aclBinding");
-                    HashMap<String,String> aclbindingMap = new HashMap<>();
-                    aclbindingMap.put("host",aclBinding.entry().host());
-                    aclbindingMap.put("principle",aclBinding.entry().principal());
-                    aclbindingMap.put("operation",aclBinding.entry().operation().toString());
-                    aclbindingMap.put("permissionType",aclBinding.entry().permissionType().toString());
-                    aclbindingMap.put("resourceType",aclBinding.pattern().resourceType().toString());
-                    aclbindingMap.put("resourceName",aclBinding.pattern().name());
-
-                    if(!aclBinding.pattern().resourceType().toString().equals("CLUSTER")) {
-                        if(aclBinding.entry().operation().toString().equals("WRITE") ||
-                                aclBinding.entry().operation().toString().equals("READ"))
-                        acls.add(aclbindingMap);
-                    }
-                });
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-
-            return acls;
+            if(client.listTopics().names().get().size()>=0)
+                return "ONLINE";
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return "OFFLINE";
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            return "OFFLINE";
         }
+        catch (Exception e){
+            return "OFFLINE";
+        }
+
+        return "OFFLINE";
+    }
+
+    public Set<HashMap<String,String>> loadAcls(String environment){
+        Set<HashMap<String,String>> acls = new HashSet<>();
+
+        AdminClient client = getAdminClient.getAdminClient(environment);
+
+        AclBindingFilter aclBindingFilter = AclBindingFilter.ANY;
+        DescribeAclsResult s = client.describeAcls(aclBindingFilter);
+
+         try {
+            s.values().get().stream().forEach(aclBinding -> {
+                //LOG.info(aclBinding+" ---- aclBinding");
+                HashMap<String,String> aclbindingMap = new HashMap<>();
+                aclbindingMap.put("host",aclBinding.entry().host());
+                aclbindingMap.put("principle",aclBinding.entry().principal());
+                aclbindingMap.put("operation",aclBinding.entry().operation().toString());
+                aclbindingMap.put("permissionType",aclBinding.entry().permissionType().toString());
+                aclbindingMap.put("resourceType",aclBinding.pattern().resourceType().toString());
+                aclbindingMap.put("resourceName",aclBinding.pattern().name());
+
+                if(!aclBinding.pattern().resourceType().toString().equals("CLUSTER")) {
+                    if(aclBinding.entry().operation().toString().equals("WRITE") ||
+                            aclBinding.entry().operation().toString().equals("READ"))
+                    acls.add(aclbindingMap);
+                }
+            });
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        return acls;
+    }
 
         public Set<String> loadTopics(String environment){
             AdminClient client = getAdminClient.getAdminClient(environment);
@@ -278,5 +298,4 @@ public class ManageKafkaComponents {
                 return e.getMessage();
             }
     }
-
 }
