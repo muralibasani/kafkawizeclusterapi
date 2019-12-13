@@ -113,7 +113,7 @@ public class ManageKafkaComponents {
 
         }
 
-    public String createTopic(String name, String partitions, String replicationFactor, String environment) {
+    public String createTopic(String name, String partitions, String replicationFactor, String environment) throws ExecutionException, InterruptedException {
 
         LOG.info(name + "--"+partitions + "--"+replicationFactor + "--" + environment);
 
@@ -141,6 +141,11 @@ public class ManageKafkaComponents {
                 errorMessage = e.getMessage();
             }
             LOG.error("Unable to create topic {}", name, e);
+            throw e;
+        }
+        catch (Exception e){
+            LOG.error(e.getMessage());
+            throw e;
         }
 
         //createProducerAcl(name,environment,acl_ip,acl_ssl);

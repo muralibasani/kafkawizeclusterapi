@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/topics")
@@ -49,12 +50,20 @@ public class ClusterApiController {
 
     @PostMapping(value = "/createTopics")
     public ResponseEntity<String> createTopics(@RequestBody MultiValueMap<String, String> topicRequest){
-        kafkaTopics.createTopic(
-                topicRequest.get("topicName").get(0),
-                topicRequest.get("partitions").get(0),
-                topicRequest.get("rf").get(0),
-                topicRequest.get("env").get(0)
-            );
+        try {
+            kafkaTopics.createTopic(
+                    topicRequest.get("topicName").get(0),
+                    topicRequest.get("partitions").get(0),
+                    topicRequest.get("rf").get(0),
+                    topicRequest.get("env").get(0)
+                );
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            return new ResponseEntity<String>("failure "+e, HttpStatus.OK);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return new ResponseEntity<String>("failure "+e, HttpStatus.OK);
+        }
 
         return new ResponseEntity<String>("success", HttpStatus.OK);
     }
