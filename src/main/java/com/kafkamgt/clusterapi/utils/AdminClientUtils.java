@@ -4,17 +4,21 @@ import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Properties;
 
 @Service
-public class GetAdminClient {
+public class AdminClientUtils {
 
     @Autowired
     Environment env;
+
+    public RestTemplate getRestTemplate(){
+        return new RestTemplate();
+    }
 
     public AdminClient getAdminClient(String envHost){
 
@@ -33,9 +37,9 @@ public class GetAdminClient {
 
         props.put("bootstrap.servers",environment);
 
-        props.put(AdminClientConfig.RETRIES_CONFIG,"2" );
-        props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG,"5000" );
-        props.put(AdminClientConfig.RETRY_BACKOFF_MS_CONFIG,"5000" );
+        props.put(AdminClientConfig.RETRIES_CONFIG, "2" );
+        props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, "5000" );
+        props.put(AdminClientConfig.RETRY_BACKOFF_MS_CONFIG, "5000" );
 
 
         return props;
