@@ -81,6 +81,7 @@ public class ManageKafkaComponents {
              e.printStackTrace();
          }
 
+         client.close();
         return acls;
     }
 
@@ -112,7 +113,6 @@ public class ManageKafkaComponents {
         client.close();
 
         return topics;
-
     }
 
     public String createTopic(String name, String partitions, String replicationFactor,
@@ -146,7 +146,7 @@ public class ManageKafkaComponents {
                 Thread.currentThread().interrupt();
                 errorMessage = e.getMessage();
             }
-            log.error("Unable to create topic {}", name, errorMessage);
+            log.error("Unable to create topic {}, {}", name, errorMessage);
             throw e;
         }
         catch (Exception e){
