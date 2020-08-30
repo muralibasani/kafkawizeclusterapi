@@ -37,23 +37,16 @@ public class ManageKafkaComponents {
     }
 
     public String getStatus(String environment){
-
+        AdminClient client = null;
         try {
-            AdminClient client = getAdminClient.getAdminClient(environment);
-            if(client.listTopics().names().get().size()>=0)
+            client = getAdminClient.getAdminClient(environment);
+            if(client != null)
                 return "ONLINE";
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return "OFFLINE";
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+            else
+                return "OFFLINE";
+        }  catch (Exception e){
             return "OFFLINE";
         }
-        catch (Exception e){
-            return "OFFLINE";
-        }
-
-        return "OFFLINE";
     }
 
     public Set<HashMap<String,String>> loadAcls(String environment){
@@ -61,6 +54,8 @@ public class ManageKafkaComponents {
 
         AdminClient client = getAdminClient.getAdminClient(environment);
 
+        if(client == null)
+            return acls;
          try {
              AclBindingFilter aclBindingFilter = AclBindingFilter.ANY;
              DescribeAclsResult aclsResult = client.describeAcls(aclBindingFilter);
@@ -91,8 +86,12 @@ public class ManageKafkaComponents {
 
     public Set<String> loadTopics(String environment){
         AdminClient client = getAdminClient.getAdminClient(environment);
-        ListTopicsResult topicsResult = client.listTopics();
         Set<String> topics = new HashSet<>();
+        if(client == null)
+            return topics;
+
+        ListTopicsResult topicsResult = client.listTopics();
+
         try {
 
             DescribeTopicsResult s = client.describeTopics(new ArrayList<>(topicsResult.names().get()));
@@ -106,9 +105,7 @@ public class ManageKafkaComponents {
                             }
                     );
 
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
 
@@ -122,8 +119,11 @@ public class ManageKafkaComponents {
                               String environment) throws ExecutionException, InterruptedException {
 
         log.info(name + "--"+partitions + "--"+replicationFactor + "--" + environment);
-
-        try (AdminClient client = getAdminClient.getAdminClient(environment)) {
+        AdminClient client = null;
+        try{
+            client = getAdminClient.getAdminClient(environment);
+            if(client == null)
+                return "failure";
 
             NewTopic topic = new NewTopic(name, Integer.parseInt(partitions),
                     Short.parseShort(replicationFactor));
@@ -154,6 +154,7 @@ public class ManageKafkaComponents {
             throw e;
         }
 
+        client.close();
         return "success";
 
     }
@@ -164,6 +165,9 @@ public class ManageKafkaComponents {
         log.info("In producer alcs::"+acl_ip +"--"+ acl_ssl);
 
         try (AdminClient client = getAdminClient.getAdminClient(environment)) {
+            if(client == null)
+                return "failure";
+
             List<AclBinding> aclListArray = new ArrayList<>();
             String host, principal;
             if(acl_ssl!=null  && acl_ssl.trim().length()>0){
@@ -222,7 +226,13 @@ public class ManageKafkaComponents {
     public String createConsumerAcl(String topicName, String environment, String acl_ip,
                                     String acl_ssl, String consumerGroup) {
 
-        try (AdminClient client = getAdminClient.getAdminClient(environment)) {
+        AdminClient client = null;
+        try {
+            client = getAdminClient.getAdminClient(environment);
+
+            if(client == null)
+                return "failure";
+
             List<AclBinding> aclListArray = new ArrayList<>();
             String host = null, principal=null;
 
@@ -279,7 +289,10 @@ public class ManageKafkaComponents {
                 log.info(aclListArray.get(0).entry().host()+"----");
                 client.createAcls(aclListArray);
             }
+        }catch (Exception e){
+           return "failure";
         }
+        client.close();
         return "success";
     }
 
@@ -303,9 +316,7 @@ public class ManageKafkaComponents {
 
                 ResponseEntity<String> responseNew = restTemplate.postForEntity(uri, request, String.class);
 
-                String updateTopicReqStatus = responseNew.getBody();
-
-                return updateTopicReqStatus;
+                return responseNew.getBody();
 
             }
             catch(Exception e){

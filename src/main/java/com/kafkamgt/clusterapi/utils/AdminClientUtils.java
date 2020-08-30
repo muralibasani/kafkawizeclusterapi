@@ -24,12 +24,23 @@ public class AdminClientUtils {
 
         String envOnlyHost = envHost.substring(0,envHost.indexOf(":"));
         String ssl_acl_enabled = env.getProperty(envOnlyHost+".connect_with_ssl_kafkacluster");
-        if(ssl_acl_enabled==null)
-            return AdminClient.create(getPlainProperties(envHost));
-        else if(ssl_acl_enabled!=null && ssl_acl_enabled.equals("true"))
-            return AdminClient.create(getSslProperties(envHost));
-        else
-            return AdminClient.create(getPlainProperties(envHost));
+        AdminClient adminClient = null;
+
+        if(ssl_acl_enabled==null) {
+            adminClient =  AdminClient.create(getPlainProperties(envHost));
+        } else if(ssl_acl_enabled.equals("true")) {
+            adminClient =  AdminClient.create(getSslProperties(envHost));
+        } else {
+            adminClient =  AdminClient.create(getPlainProperties(envHost));
+        }
+
+        try{
+            adminClient.listTopics().names().get();
+            return adminClient;
+        }catch (Exception e){
+            adminClient.close();
+            return null;
+        }
     }
 
     public Properties getPlainProperties(String environment){
