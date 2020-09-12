@@ -27,6 +27,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -89,12 +90,12 @@ public class ManageKafkaComponentsTest {
 
     @Test
     public void getStatusOnline() throws ExecutionException, InterruptedException {
-        Set<String> topicsSet = utilMethods.getTopics();
+        Set<HashMap<String,String>> topicsSet = utilMethods.getTopics();
 
         when(getAdminClient.getAdminClient(any())).thenReturn(adminClient);
-        when(adminClient.listTopics()).thenReturn(listTopicsResult);
-        when(listTopicsResult.names()).thenReturn(kafkaFuture);
-        when(kafkaFuture.get()).thenReturn(topicsSet);
+//        when(adminClient.listTopics()).thenReturn(listTopicsResult);
+//        when(listTopicsResult.names()).thenReturn(kafkaFuture);
+//        doNothing().when(kafkaFuture.get());
 
         String result = manageKafkaComponents.getStatus("localhost");
         assertEquals("ONLINE", result);
@@ -102,7 +103,7 @@ public class ManageKafkaComponentsTest {
 
     @Test
     public void getStatusOffline1(){
-        when(getAdminClient.getAdminClient(any())).thenReturn(adminClient);
+        when(getAdminClient.getAdminClient(any())).thenReturn(null);
         String result = manageKafkaComponents.getStatus("localhost");
         assertEquals("OFFLINE", result);
     }
@@ -159,25 +160,36 @@ public class ManageKafkaComponentsTest {
 
     @Test
     public void loadTopics() throws ExecutionException, InterruptedException {
-        Set<String> topicsSet = utilMethods.getTopics();
-
+        Set<HashMap<String,String>> topicsSet = utilMethods.getTopics();
+        Set<String> list = new HashSet<>();
         when(getAdminClient.getAdminClient(any())).thenReturn(adminClient);
         when(adminClient.listTopics()).thenReturn(listTopicsResult);
         when(listTopicsResult.names()).thenReturn(kafkaFuture);
-        when(kafkaFuture.get()).thenReturn(topicsSet);
+        when(kafkaFuture.get()).thenReturn(list);
+
         when(adminClient.describeTopics(any())).thenReturn(describeTopicsResult);
         when(describeTopicsResult.all()).thenReturn(kafkaFutureTopicdesc);
         when(kafkaFutureTopicdesc.get()).thenReturn(getTopicDescs());
 
-        Set<String> result = manageKafkaComponents.loadTopics("localhost");
+        Set<HashMap<String,String>> result = manageKafkaComponents.loadTopics("localhost");
+
+        HashMap<String, String> hashMap = new HashMap<>();
+        hashMap.put("partitions","2");
+        hashMap.put("replicationFactor","1");
+        hashMap.put("topicName","testtopic2");
+
+        HashMap<String, String> hashMap1 = new HashMap<>();
+        hashMap1.put("partitions","2");
+        hashMap1.put("replicationFactor","1");
+        hashMap1.put("topicName","testtopic1");
 
         assertEquals(2, result.size());
-        assertEquals("testtopic1:::::1:::::2", new ArrayList<>(result).get(0));
-        assertEquals("testtopic2:::::1:::::2", new ArrayList<>(result).get(1));
+        assertEquals(hashMap, new ArrayList<>(result).get(0));
+        assertEquals(hashMap1, new ArrayList<>(result).get(1));
     }
 
     @Test
-    public void createTopicSuccess() throws ExecutionException, InterruptedException {
+    public void createTopicSuccess() throws Exception {
         String name = "testtopic1", partitions = "1", replicationFactor = "1", environment = "localhost";
         when(getAdminClient.getAdminClient(any())).thenReturn(adminClient);
         when(adminClient.createTopics(any())).thenReturn(createTopicsResult);
@@ -189,18 +201,17 @@ public class ManageKafkaComponentsTest {
         assertEquals("success", result);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void createTopicFailure1() throws ExecutionException, InterruptedException {
+    @Test(expected = Exception.class)
+    public void createTopicFailure1() throws Exception {
         String name = "testtopic1", partitions = "1", replicationFactor = "1", environment = "localhost";
         when(getAdminClient.getAdminClient(any())).thenReturn(null);
-
 
         manageKafkaComponents.createTopic(name, partitions, replicationFactor,
                 environment);
     }
 
     @Test(expected = NumberFormatException.class)
-    public void createTopicFailure2() throws ExecutionException, InterruptedException {
+    public void createTopicFailure2() throws Exception {
         String name = "testtopic1", partitions = "1aa", replicationFactor = "1aa", environment = "localhost";
         when(getAdminClient.getAdminClient(any())).thenReturn(adminClient);
 
@@ -209,7 +220,7 @@ public class ManageKafkaComponentsTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void createTopicFailure4() throws ExecutionException, InterruptedException {
+    public void createTopicFailure4() throws Exception {
         String name = "testtopic1", partitions = "1", replicationFactor = "1", environment = "localhost";
         when(getAdminClient.getAdminClient(any())).thenReturn(adminClient);
         when(adminClient.createTopics(any())).thenThrow(new RuntimeException("Runtime exption"));
@@ -225,8 +236,8 @@ public class ManageKafkaComponentsTest {
         when(getAdminClient.getAdminClient(any())).thenReturn(adminClient);
         when(adminClient.createAcls(any())).thenReturn(createAclsResult);
 
-        String result = manageKafkaComponents.createProducerAcl(topicName, environment,
-                acl_ip, null);
+        String result = manageKafkaComponents.updateProducerAcl(topicName, environment,
+                acl_ip, null,"Create");
         assertEquals("success", result);
     }
 
@@ -237,8 +248,8 @@ public class ManageKafkaComponentsTest {
         when(getAdminClient.getAdminClient(any())).thenReturn(adminClient);
         when(adminClient.createAcls(any())).thenReturn(createAclsResult);
 
-        String result = manageKafkaComponents.createProducerAcl(topicName, environment,
-                null, acl_ssl);
+        String result = manageKafkaComponents.updateProducerAcl(topicName, environment,
+                null, acl_ssl,"Create");
         assertEquals("success", result);
     }
 
@@ -249,8 +260,8 @@ public class ManageKafkaComponentsTest {
         when(getAdminClient.getAdminClient(any())).thenReturn(adminClient);
         when(adminClient.createAcls(any())).thenReturn(createAclsResult);
 
-        String result = manageKafkaComponents.createConsumerAcl(topicName, environment,
-                acl_ip, null, consumerGroup);
+        String result = manageKafkaComponents.updateConsumerAcl(topicName, environment,
+                acl_ip, null, consumerGroup,"Create");
         assertEquals("success", result);
     }
 
@@ -261,8 +272,8 @@ public class ManageKafkaComponentsTest {
         when(getAdminClient.getAdminClient(any())).thenReturn(adminClient);
         when(adminClient.createAcls(any())).thenReturn(createAclsResult);
 
-        String result = manageKafkaComponents.createConsumerAcl(topicName, environment,
-                null, acl_ssl, consumerGroup);
+        String result = manageKafkaComponents.updateConsumerAcl(topicName, environment,
+                null, acl_ssl, consumerGroup,"Create");
         assertEquals("success", result);
     }
 
