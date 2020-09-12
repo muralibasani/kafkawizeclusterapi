@@ -33,8 +33,8 @@ public class ClusterApiController {
     }
 
     @RequestMapping(value = "/getTopics/{env}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Set<String>> getTopics(@PathVariable String env){
-        Set<String> topics = manageKafkaComponents.loadTopics(env);
+    public ResponseEntity<Set<HashMap<String,String>>> getTopics(@PathVariable String env){
+        Set<HashMap<String,String>> topics = manageKafkaComponents.loadTopics(env);
         return new ResponseEntity<>(topics, HttpStatus.OK);
     }
 
@@ -56,30 +56,32 @@ public class ClusterApiController {
                 );
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<String>("failure "+e, HttpStatus.OK);
+            return new ResponseEntity<>("failure "+e, HttpStatus.OK);
         }
 
-        return new ResponseEntity<String>("success", HttpStatus.OK);
+        return new ResponseEntity<>("success", HttpStatus.OK);
     }
 
     @PostMapping(value = "/createAcls")
     public ResponseEntity<String> createAcls(@RequestBody MultiValueMap<String, String> topicRequest){
 
+        String result;
         try {
             String aclType = topicRequest.get("aclType").get(0);
 
             if (aclType.equals("Producer"))
-                manageKafkaComponents.createProducerAcl(topicRequest.get("topicName").get(0),
+                result = manageKafkaComponents.updateProducerAcl(topicRequest.get("topicName").get(0),
                         topicRequest.get("env").get(0),
-                        topicRequest.get("acl_ip").get(0), topicRequest.get("acl_ssl").get(0));
+                        topicRequest.get("acl_ip").get(0), topicRequest.get("acl_ssl").get(0), "Create");
             else
-                manageKafkaComponents.createConsumerAcl(topicRequest.get("topicName").get(0),
+                result = manageKafkaComponents.updateConsumerAcl(topicRequest.get("topicName").get(0),
                         topicRequest.get("env").get(0),
-                        topicRequest.get("acl_ip").get(0), topicRequest.get("acl_ssl").get(0), topicRequest.get("consumerGroup").get(0));
+                        topicRequest.get("acl_ip").get(0), topicRequest.get("acl_ssl").get(0),
+                        topicRequest.get("consumerGroup").get(0), "Create");
 
-            return new ResponseEntity<String>("success", HttpStatus.OK);
+            return new ResponseEntity<>(result, HttpStatus.OK);
         }catch(Exception e){
-            return new ResponseEntity<String>("failure "+e.getMessage(), HttpStatus.OK);
+            return new ResponseEntity<>("failure "+e.getMessage(), HttpStatus.OK);
         }
     }
 

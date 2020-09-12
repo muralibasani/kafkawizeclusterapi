@@ -134,8 +134,8 @@ public class ClusterApiControllerTest {
         MultiValueMap<String, String> topicRequest = utilMethods.getMappedValuesAcls("Producer");
         String jsonReq = new ObjectMapper().writer().writeValueAsString(topicRequest);
 
-        when(manageKafkaComponents.createProducerAcl(topicRequest.get("topicName").get(0),topicRequest.get("env").get(0),
-                topicRequest.get("acl_ip").get(0),topicRequest.get("acl_ssl").get(0))).thenReturn("success");
+        when(manageKafkaComponents.updateProducerAcl(topicRequest.get("topicName").get(0),topicRequest.get("env").get(0),
+                topicRequest.get("acl_ip").get(0),topicRequest.get("acl_ssl").get(0),"Create")).thenReturn("success");
 
         String response = mvc.perform(MockMvcRequestBuilders
                 .post("/topics/createAcls")
@@ -154,8 +154,8 @@ public class ClusterApiControllerTest {
 
         String jsonReq = new ObjectMapper().writeValueAsString(topicRequest);
 
-        when(manageKafkaComponents.createConsumerAcl(topicRequest.get("topicName").get(0),topicRequest.get("env").get(0),
-                topicRequest.get("acl_ip").get(0),topicRequest.get("acl_ssl").get(0), topicRequest.get("consumerGroup").get(0)))
+        when(manageKafkaComponents.updateConsumerAcl(topicRequest.get("topicName").get(0),topicRequest.get("env").get(0),
+                topicRequest.get("acl_ip").get(0),topicRequest.get("acl_ssl").get(0), topicRequest.get("consumerGroup").get(0),"Create"))
                 .thenReturn("success1");
 
         String response = mvc.perform(MockMvcRequestBuilders
@@ -174,8 +174,8 @@ public class ClusterApiControllerTest {
         MultiValueMap<String, String> topicRequest = utilMethods.getMappedValuesAcls("Consumer");
         String jsonReq = new ObjectMapper().writer().writeValueAsString(topicRequest);
 
-        when(manageKafkaComponents.createConsumerAcl(topicRequest.get("topicName").get(0),topicRequest.get("env").get(0),
-                topicRequest.get("acl_ip").get(0),topicRequest.get("acl_ssl").get(0), topicRequest.get("consumerGroup").get(0)))
+        when(manageKafkaComponents.updateConsumerAcl(topicRequest.get("topicName").get(0),topicRequest.get("env").get(0),
+                topicRequest.get("acl_ip").get(0),topicRequest.get("acl_ssl").get(0), topicRequest.get("consumerGroup").get(0),"Create"))
                 .thenThrow(new RuntimeException("Error creating acls"));
 
         String response = mvc.perform(MockMvcRequestBuilders
