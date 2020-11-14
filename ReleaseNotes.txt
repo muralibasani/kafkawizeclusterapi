@@ -1,0 +1,5 @@
+Release Notes
+
+Kafkawizeclusterapi 4.4
+
+1. Changes include initial load of Admin client connections

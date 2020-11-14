@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.MultiValueMap;
 
-import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -64,10 +63,10 @@ public class ClusterApiControllerTest {
     @Test
     public void getStatus() throws Exception {
         String env = "DEV";
-        when(manageKafkaComponents.getStatus(env)).thenReturn("ONLINE");
+        when(manageKafkaComponents.getStatus(env, "PLAINTEXT")).thenReturn("ONLINE");
 
         String res = mvc.perform(MockMvcRequestBuilders
-                .get("/topics/getStatus/"+env)
+                .get("/topics/getStatus/"+env+"/PLAINTEXT")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -79,10 +78,10 @@ public class ClusterApiControllerTest {
     @Test
     public void getTopics() throws Exception {
         String env = "DEV";
-        when(manageKafkaComponents.loadTopics(env)).thenReturn(utilMethods.getTopics());
+        when(manageKafkaComponents.loadTopics(env, "PLAINTEXT")).thenReturn(utilMethods.getTopics());
 
         String res = mvc.perform(MockMvcRequestBuilders
-                .get("/topics/getTopics/"+env)
+                .get("/topics/getTopics/"+env+"/PLAINTEXT")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -95,10 +94,10 @@ public class ClusterApiControllerTest {
     @Test
     public void getAcls() throws Exception {
         String env = "DEV";
-        when(manageKafkaComponents.loadAcls(env)).thenReturn(utilMethods.getAcls());
+        when(manageKafkaComponents.loadAcls(env, "PLAINTEXT")).thenReturn(utilMethods.getAcls());
 
         String res = mvc.perform(MockMvcRequestBuilders
-                .get("/topics/getAcls/"+env)
+                .get("/topics/getAcls/"+env+"/PLAINTEXT")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -116,7 +115,9 @@ public class ClusterApiControllerTest {
         when(manageKafkaComponents.createTopic(eq(topicRequest.get("topicName").get(0)),
                 eq(topicRequest.get("partitions").get(0)),
                 eq(topicRequest.get("rf").get(0)),
-                eq(topicRequest.get("env").get(0)))).thenReturn("success");
+                eq(topicRequest.get("env").get(0)),
+                eq(topicRequest.get("protocol").get(0))
+        )).thenReturn("success");
 
         String response = mvc.perform(MockMvcRequestBuilders
                 .post("/topics/createTopics")
@@ -134,7 +135,7 @@ public class ClusterApiControllerTest {
         MultiValueMap<String, String> topicRequest = utilMethods.getMappedValuesAcls("Producer");
         String jsonReq = new ObjectMapper().writer().writeValueAsString(topicRequest);
 
-        when(manageKafkaComponents.updateProducerAcl(topicRequest.get("topicName").get(0),topicRequest.get("env").get(0),
+        when(manageKafkaComponents.updateProducerAcl(topicRequest.get("topicName").get(0),topicRequest.get("env").get(0), topicRequest.get("protocol").get(0),
                 topicRequest.get("acl_ip").get(0),topicRequest.get("acl_ssl").get(0),"Create")).thenReturn("success");
 
         String response = mvc.perform(MockMvcRequestBuilders
@@ -154,7 +155,7 @@ public class ClusterApiControllerTest {
 
         String jsonReq = new ObjectMapper().writeValueAsString(topicRequest);
 
-        when(manageKafkaComponents.updateConsumerAcl(topicRequest.get("topicName").get(0),topicRequest.get("env").get(0),
+        when(manageKafkaComponents.updateConsumerAcl(topicRequest.get("topicName").get(0),topicRequest.get("env").get(0), topicRequest.get("protocol").get(0),
                 topicRequest.get("acl_ip").get(0),topicRequest.get("acl_ssl").get(0), topicRequest.get("consumerGroup").get(0),"Create"))
                 .thenReturn("success1");
 
@@ -174,7 +175,7 @@ public class ClusterApiControllerTest {
         MultiValueMap<String, String> topicRequest = utilMethods.getMappedValuesAcls("Consumer");
         String jsonReq = new ObjectMapper().writer().writeValueAsString(topicRequest);
 
-        when(manageKafkaComponents.updateConsumerAcl(topicRequest.get("topicName").get(0),topicRequest.get("env").get(0),
+        when(manageKafkaComponents.updateConsumerAcl(topicRequest.get("topicName").get(0),topicRequest.get("env").get(0), topicRequest.get("protocol").get(0),
                 topicRequest.get("acl_ip").get(0),topicRequest.get("acl_ssl").get(0), topicRequest.get("consumerGroup").get(0),"Create"))
                 .thenThrow(new RuntimeException("Error creating acls"));
 
