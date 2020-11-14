@@ -37,23 +37,26 @@ public class ManageKafkaComponents {
         this.getAdminClient = getAdminClient;
     }
 
-    public String getStatus(String environment){
+    public String getStatus(String environment, String protocol){
 
         try {
-            AdminClient client = getAdminClient.getAdminClient(environment);
-            if(client != null)
+            AdminClient client = getAdminClient.getAdminClient(environment, protocol);
+            if(client != null) {
+                //client.close();
                 return "ONLINE";
+            }
             else
                 return "OFFLINE";
+
         } catch (Exception e){
             return "OFFLINE";
         }
     }
 
-    public Set<HashMap<String,String>> loadAcls(String environment){
+    public Set<HashMap<String,String>> loadAcls(String environment, String protocol){
         Set<HashMap<String,String>> acls = new HashSet<>();
 
-        AdminClient client = getAdminClient.getAdminClient(environment);
+        AdminClient client = getAdminClient.getAdminClient(environment, protocol);
         if(client == null)
             return acls;
 
@@ -82,12 +85,12 @@ public class ManageKafkaComponents {
              e.printStackTrace();
          }
 
-        client.close();
+        //client.close();
         return acls;
     }
 
-    public Set<HashMap<String,String>> loadTopics(String environment){
-        AdminClient client = getAdminClient.getAdminClient(environment);
+    public Set<HashMap<String,String>> loadTopics(String environment, String protocol){
+        AdminClient client = getAdminClient.getAdminClient(environment, protocol);
         Set<HashMap<String,String>> topics = new HashSet<>();
         if(client == null)
             return topics;
@@ -112,19 +115,19 @@ public class ManageKafkaComponents {
             e.printStackTrace();
         }
 
-        client.close();
+        //client.close();
 
         return topics;
     }
 
     public String createTopic(String name, String partitions, String replicationFactor,
-                              String environment) throws Exception {
+                              String environment, String protocol) throws Exception {
 
         log.info(name + "--"+partitions + "--"+replicationFactor + "--" + environment);
 
-        AdminClient client;
+        AdminClient client = null;
         try{
-            client = getAdminClient.getAdminClient(environment);
+            client = getAdminClient.getAdminClient(environment, protocol);
             if(client == null)
                 throw new Exception("Cannot connect to cluster.");
 
@@ -136,10 +139,14 @@ public class ManageKafkaComponents {
         } catch (KafkaException e) {
             String errorMessage = "Invalid properties: ";
             log.error(errorMessage, e);
+//            assert client != null;
+//            client.close();
             throw e;
         } catch (NumberFormatException e) {
             String errorMessage = "Invalid replica assignment string";
             log.error(errorMessage, e);
+//            assert client != null;
+//            client.close();
             throw e;
         } catch (ExecutionException | InterruptedException e) {
             String errorMessage;
@@ -150,25 +157,29 @@ public class ManageKafkaComponents {
                 errorMessage = e.getMessage();
             }
             log.error("Unable to create topic {}, {}", name, errorMessage);
+//            assert client != null;
+//            client.close();
             throw e;
         }
         catch (Exception e){
             log.error(e.getMessage());
+//            assert client != null;
+//            client.close();
             throw e;
         }
 
-        client.close();
+//        client.close();
         return "success";
 
     }
 
-    public void deleteTopic(String topicName, String environment) throws Exception {
+    public void deleteTopic(String topicName, String environment, String protocol) throws Exception {
 
         log.info(topicName + "--" + environment);
 
-        AdminClient client;
+        AdminClient client = null;
         try{
-            client = getAdminClient.getAdminClient(environment);
+            client = getAdminClient.getAdminClient(environment, protocol);
             if(client == null)
                 throw new Exception("Cannot connect to cluster.");
 
@@ -177,6 +188,8 @@ public class ManageKafkaComponents {
         } catch (KafkaException e) {
             String errorMessage = "Invalid properties: ";
             log.error(errorMessage, e);
+//            assert client != null;
+//            client.close();
             throw e;
         }  catch (ExecutionException | InterruptedException e) {
             String errorMessage;
@@ -187,23 +200,27 @@ public class ManageKafkaComponents {
                 errorMessage = e.getMessage();
             }
             log.error("Unable to delete topic {}, {}", topicName, errorMessage);
+//            assert client != null;
+//            client.close();
             throw e;
         }
         catch (Exception e){
             log.error(e.getMessage());
+//            assert client != null;
+//            client.close();
             throw e;
         }
 
-        client.close();
+//        client.close();
     }
 
-    public String updateProducerAcl(String topicName, String environment,
+    public String updateProducerAcl(String topicName, String environment, String protocol,
                                     String acl_ip, String acl_ssl, String aclOperation) {
 
         log.info("In producer alcs::"+acl_ip +"--"+ acl_ssl);
-        AdminClient client;
+        AdminClient client = null;
         try {
-            client = getAdminClient.getAdminClient(environment);
+            client = getAdminClient.getAdminClient(environment, protocol);
             if(client==null)
                return "failure";
 
@@ -290,25 +307,28 @@ public class ManageKafkaComponents {
             }
 
         }catch (Exception e){
+//            assert client != null;
+//            client.close();
+
             return "failure";
         }
 
-        client.close();
+//        client.close();
         return "success";
         }
 
-    public String updateConsumerAcl(String topicName, String environment, String acl_ip,
+    public String updateConsumerAcl(String topicName, String environment, String protocol, String acl_ip,
                                     String acl_ssl, String consumerGroup, String aclOperation) {
-        AdminClient client;
+        AdminClient client = null;
         try {
-            client = getAdminClient.getAdminClient(environment);
+            client = getAdminClient.getAdminClient(environment, protocol);
             if(client==null)
                 return "failure";
 
             String host = null, principal=null;
 
             log.info(acl_ssl+"----acl_ssl");
-            if(acl_ssl!=null && acl_ssl.trim().length()>0){
+            if(acl_ssl != null && acl_ssl.trim().length() > 0 && !acl_ssl.equals("User:*")){
                 acl_ssl=acl_ssl.trim();
                 if(acl_ssl.contains("CN") || acl_ssl.contains("cn"))
                 {
@@ -385,7 +405,7 @@ public class ManageKafkaComponents {
 
                     log.info(aclListArray.get(0).entry().host()+"----");
                     client.createAcls(aclListArray);
-                    client.close();
+//                    client.close();
                 }else {
                     List<AclBindingFilter> aclListArray = new ArrayList<>();
 
@@ -405,15 +425,18 @@ public class ManageKafkaComponents {
 
                     log.info(aclListArray.get(0).entryFilter().host()+"----");
                     client.deleteAcls(aclListArray);
-                    client.close();
+//                    client.close();
                 }
 
             }
         }catch (Exception e){
+//            assert client != null;
+//            client.close();
+
             return "failure";
         }
 
-        client.close();
+//        client.close();
         return "success";
     }
 

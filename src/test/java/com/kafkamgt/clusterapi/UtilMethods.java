@@ -60,6 +60,7 @@ public class UtilMethods {
     public MultiValueMap<String, String> getMappedValuesTopic(){
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("env","localhost");
+        params.add("protocol","PLAINTEXT");
         params.add("topicName", "testtopic");
         params.add("partitions", "2");
         params.add("rf", "1");
@@ -70,6 +71,7 @@ public class UtilMethods {
     public MultiValueMap<String, String> getMappedValuesAcls(String aclType){
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("env","localhost");
+        params.add("protocol","PLAINTEXT");
         params.add("topicName", "testtopic");
         params.add("consumerGroup", "congroup1");
         params.add("aclType", aclType);
@@ -82,6 +84,7 @@ public class UtilMethods {
     public MultiValueMap<String, String> getMappedValuesSchema(){
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("env","localhost");
+        params.add("protocol","PLAINTEXT");
         params.add("topicName", "testtopic");
         params.add("fullSchema", "{type:string}");
 
