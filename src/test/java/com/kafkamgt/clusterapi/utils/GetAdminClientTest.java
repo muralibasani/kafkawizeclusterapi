@@ -106,11 +106,4 @@ public class GetAdminClientTest {
         assertEquals("localhost", props.getProperty("bootstrap.servers"));
     }
 
-    @Test
-    public void getSslProperties() {
-        when(env.getProperty(any())).thenReturn("somevalue");
-
-        Properties props = getAdminClient.getSslProperties("localhost:9093");
-        assertEquals("localhost:9093", props.getProperty("bootstrap.servers"));
-    }
 }
