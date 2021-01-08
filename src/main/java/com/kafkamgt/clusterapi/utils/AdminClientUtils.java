@@ -3,6 +3,7 @@ package com.kafkamgt.clusterapi.utils;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -16,8 +17,17 @@ public class AdminClientUtils {
     @Autowired
     Environment env;
 
-    private static final String RETRIES_CONFIG = "5";
-    private static final String RETRY_BACKOFF_MS_CONFIG = "5000";
+    @Value("${kafkawize.request.timeout.ms:15000}")
+    private
+    String requestTimeOutMs;
+
+    @Value("${kafkawize.retries.config:25}")
+    private
+    String retriesConfig;
+
+    @Value("${kafkawize.retry.backoff.ms:15000}")
+    private
+    String retryBackOffMsConfig;
 
     private final HashMap<String, AdminClient> adminClientsMap = new HashMap<>();;
 
@@ -53,15 +63,15 @@ public class AdminClientUtils {
     public Properties getPlainProperties(String environment){
         Properties props = new Properties();
 
-        props.put("bootstrap.servers",environment);
+        props.put("bootstrap.servers", environment);
         setOtherConfig(props);
 
         return props;
     }
 
     private void setOtherConfig(Properties props) {
-        props.put(AdminClientConfig.RETRIES_CONFIG, RETRIES_CONFIG);
-        props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, env.getProperty("kafkawize.request.timeout.ms"));
-        props.put(AdminClientConfig.RETRY_BACKOFF_MS_CONFIG, RETRY_BACKOFF_MS_CONFIG );
+        props.put(AdminClientConfig.RETRIES_CONFIG, retriesConfig);
+        props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, requestTimeOutMs);
+        props.put(AdminClientConfig.RETRY_BACKOFF_MS_CONFIG, retryBackOffMsConfig);
     }
 }
