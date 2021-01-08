@@ -49,6 +49,9 @@ public class GetAdminClientTest {
        getAdminClient = new AdminClientUtils();
         ReflectionTestUtils.setField(getAdminClient, "adminClientsMap", adminClientsMap);
         ReflectionTestUtils.setField(getAdminClient, "env", env);
+        ReflectionTestUtils.setField(getAdminClient, "retriesConfig", "5");
+        ReflectionTestUtils.setField(getAdminClient, "requestTimeOutMs", "15000");
+        ReflectionTestUtils.setField(getAdminClient, "retryBackOffMsConfig", "15000");
     }
 
     @Test

@@ -53,7 +53,7 @@ public class ManageKafkaComponents {
         }
     }
 
-    public Set<HashMap<String,String>> loadAcls(String environment, String protocol){
+    public synchronized Set<HashMap<String,String>> loadAcls(String environment, String protocol){
         Set<HashMap<String,String>> acls = new HashSet<>();
 
         AdminClient client = getAdminClient.getAdminClient(environment, protocol);
@@ -64,7 +64,7 @@ public class ManageKafkaComponents {
              AclBindingFilter aclBindingFilter = AclBindingFilter.ANY;
              DescribeAclsResult aclsResult = client.describeAcls(aclBindingFilter);
 
-                aclsResult.values().get().stream()
+                aclsResult.values().get()
                     .forEach(aclBinding -> {
                 HashMap<String,String> aclbindingMap = new HashMap<>();
                 aclbindingMap.put("host", aclBinding.entry().host());
@@ -89,7 +89,7 @@ public class ManageKafkaComponents {
         return acls;
     }
 
-    public Set<HashMap<String,String>> loadTopics(String environment, String protocol){
+    public synchronized Set<HashMap<String,String>> loadTopics(String environment, String protocol){
         AdminClient client = getAdminClient.getAdminClient(environment, protocol);
         Set<HashMap<String,String>> topics = new HashSet<>();
         if(client == null)
@@ -120,12 +120,12 @@ public class ManageKafkaComponents {
         return topics;
     }
 
-    public String createTopic(String name, String partitions, String replicationFactor,
+    public synchronized String createTopic(String name, String partitions, String replicationFactor,
                               String environment, String protocol) throws Exception {
 
         log.info(name + "--"+partitions + "--"+replicationFactor + "--" + environment);
 
-        AdminClient client = null;
+        AdminClient client;
         try{
             client = getAdminClient.getAdminClient(environment, protocol);
             if(client == null)
@@ -139,14 +139,10 @@ public class ManageKafkaComponents {
         } catch (KafkaException e) {
             String errorMessage = "Invalid properties: ";
             log.error(errorMessage, e);
-//            assert client != null;
-//            client.close();
             throw e;
         } catch (NumberFormatException e) {
             String errorMessage = "Invalid replica assignment string";
             log.error(errorMessage, e);
-//            assert client != null;
-//            client.close();
             throw e;
         } catch (ExecutionException | InterruptedException e) {
             String errorMessage;
@@ -157,27 +153,22 @@ public class ManageKafkaComponents {
                 errorMessage = e.getMessage();
             }
             log.error("Unable to create topic {}, {}", name, errorMessage);
-//            assert client != null;
-//            client.close();
             throw e;
         }
         catch (Exception e){
             log.error(e.getMessage());
-//            assert client != null;
-//            client.close();
             throw e;
         }
 
-//        client.close();
         return "success";
 
     }
 
-    public void deleteTopic(String topicName, String environment, String protocol) throws Exception {
+    public synchronized void deleteTopic(String topicName, String environment, String protocol) throws Exception {
 
         log.info(topicName + "--" + environment);
 
-        AdminClient client = null;
+        AdminClient client;
         try{
             client = getAdminClient.getAdminClient(environment, protocol);
             if(client == null)
@@ -206,19 +197,16 @@ public class ManageKafkaComponents {
         }
         catch (Exception e){
             log.error(e.getMessage());
-//            assert client != null;
-//            client.close();
             throw e;
         }
 
-//        client.close();
     }
 
-    public String updateProducerAcl(String topicName, String environment, String protocol,
+    public synchronized String updateProducerAcl(String topicName, String environment, String protocol,
                                     String acl_ip, String acl_ssl, String aclOperation) {
 
-        log.info("In producer alcs::"+acl_ip +"--"+ acl_ssl);
-        AdminClient client = null;
+        log.info("In producer alcs:: {} {} ", acl_ip, acl_ssl);
+        AdminClient client;
         try {
             client = getAdminClient.getAdminClient(environment, protocol);
             if(client==null)
@@ -230,7 +218,7 @@ public class ManageKafkaComponents {
                 if(acl_ssl.contains("CN") || acl_ssl.contains("cn"))
                 {
                     host = "*";
-                    principal = "User:"+acl_ssl;
+                    principal = "User:" + acl_ssl;
 
                     log.info(principal+"In producer alcs::"+host);
 
@@ -317,15 +305,15 @@ public class ManageKafkaComponents {
         return "success";
         }
 
-    public String updateConsumerAcl(String topicName, String environment, String protocol, String acl_ip,
+    public synchronized String updateConsumerAcl(String topicName, String environment, String protocol, String acl_ip,
                                     String acl_ssl, String consumerGroup, String aclOperation) {
-        AdminClient client = null;
+        AdminClient client;
         try {
             client = getAdminClient.getAdminClient(environment, protocol);
             if(client==null)
                 return "failure";
 
-            String host = null, principal=null;
+            String host = null, principal = null;
 
             log.info(acl_ssl+"----acl_ssl");
             if(acl_ssl != null && acl_ssl.trim().length() > 0 && !acl_ssl.equals("User:*")){
@@ -355,7 +343,7 @@ public class ManageKafkaComponents {
                     AclBinding aclBinding3 = new AclBinding(resourcePattern,aclEntry);
                     aclListArray.add(aclBinding3);
 
-                    log.info(aclListArray.get(0).entry().host()+"----");
+                    log.info("Host {}", aclListArray.get(0).entry().host());
                     client.createAcls(aclListArray);
                 }else{
                     List<AclBindingFilter> aclListArray = new ArrayList<>();
@@ -440,7 +428,7 @@ public class ManageKafkaComponents {
         return "success";
     }
 
-    public String postSchema(String topicName, String schema, String environmentVal){
+    public synchronized String postSchema(String topicName, String schema, String environmentVal){
             try {
                 String schemaRegistryUrl = env.getProperty(environmentVal+".schemaregistry.url");
                 if(schemaRegistryUrl == null)
@@ -460,9 +448,7 @@ public class ManageKafkaComponents {
 
                 ResponseEntity<String> responseNew = restTemplate.postForEntity(uri, request, String.class);
 
-                String updateTopicReqStatus = responseNew.getBody();
-
-                return updateTopicReqStatus;
+                return responseNew.getBody();
 
             }
             catch(Exception e){
