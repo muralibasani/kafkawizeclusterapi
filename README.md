@@ -29,3 +29,7 @@ This project is licensed under the Apache License  - see the [LICENSE.md](LICENS
 
 ![Architecture](https://github.com/muralibasani/kafkawize/blob/master/screenshots/arch.png)
 
+## Install
+
+mvn clean install
+Follow steps at https://kafkawize.readthedocs.io/en/latest
