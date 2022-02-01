@@ -1,8 +1,9 @@
 package com.kafkamgt.clusterapi.config;
 
-
+import org.jasypt.util.text.BasicTextEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -11,25 +12,17 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @EnableWebSecurity
+@PropertySource(value= {"classpath:application.properties"})
 public class SecurityConfig extends WebSecurityConfigurerAdapter{
 
-    @Value("${securityconfig.user1.username}")
+    @Value("${kafkawize.clusterapi.access.username}")
     String user1_username;
 
-    @Value("${securityconfig.user1.pwd}")
+    @Value("${kafkawize.clusterapi.access.password}")
     String user1_pwd;
 
-    @Value("${securityconfig.user1.role}")
-    String user1_role;
-
-    @Value("${securityconfig.user2.username}")
-    String user2_username;
-
-    @Value("${securityconfig.user2.pwd}")
-    String user2_pwd;
-
-    @Value("${securityconfig.user2.role}")
-    String user2_role;
+    @Value("${kafkawize.jasypt.encryptor.secretkey}")
+    String encryptorSecretKey;
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth)  throws Exception {
@@ -39,19 +32,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 
         auth.inMemoryAuthentication()
                 .passwordEncoder(encoder)
-                .withUser(user1_username).password(encoder.encode(user1_pwd)).roles(user1_role)
-                .and()
-                .withUser(user2_username).password(encoder.encode(user2_pwd)).roles(user2_role);
+                .withUser(user1_username).password(encoder.encode(decodePwd(user1_pwd))).roles("USER");
     }
 
     @Override
     protected void configure (HttpSecurity http) throws Exception {
-        http.csrf().disable().authorizeRequests().anyRequest().permitAll()
-                .and()
+        http.csrf().disable()//.authorizeRequests().anyRequest().permitAll()
+//                .and()
                 .authorizeRequests()
-                .anyRequest()//.fullyAuthenticated()
-                //.and()
-                //.formLogin()
-                .permitAll();
+                .anyRequest().fullyAuthenticated()
+                .and()
+                .httpBasic();
+    }
+
+    private String decodePwd(String pwd){
+        if(pwd != null) {
+            BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
+            textEncryptor.setPasswordCharArray(encryptorSecretKey.toCharArray());
+
+            return textEncryptor.decrypt(pwd);
+        }
+        return "";
     }
 }
