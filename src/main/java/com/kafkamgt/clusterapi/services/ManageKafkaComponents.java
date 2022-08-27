@@ -1,5 +1,6 @@
 package com.kafkamgt.clusterapi.services;
 
+import com.kafkamgt.clusterapi.models.AclIPPrincipleType;
 import com.kafkamgt.clusterapi.utils.AdminClientUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.*;
@@ -305,11 +306,12 @@ public class ManageKafkaComponents {
 
 
     public synchronized String updateProducerAcl(String topicName, String environment, String protocol, String clusterName,
-                                    String acl_ip, String acl_ssl, String aclOperation, String isPrefixAcl, String transactionalId) {
+                                    String acl_ip, String acl_ssl, String aclOperation, String isPrefixAcl, String transactionalId,
+                                                 String aclIpPrincipleType) {
 
-        log.info("updateProducerAcl TopicName:{} Env:{} Protocol:{} AclIP:{} AclSSL:{} AclOperation:{} PrefixAcl:{} TxnId:{}",
-                topicName, environment, protocol,
-                acl_ip, acl_ssl, aclOperation, isPrefixAcl, transactionalId);
+        log.info("updateProducerAcl TopicName:{} Env:{} Protocol:{} AclIP:{} AclSSL:{} AclOperation:{} PrefixAcl:{} TxnId:{}" +
+                        " aclIpPrincipleType: {}",
+                topicName, environment, protocol, acl_ip, acl_ssl, aclOperation, isPrefixAcl, transactionalId, aclIpPrincipleType);
         AdminClient client;
         try {
             PatternType patternType;
@@ -325,7 +327,8 @@ public class ManageKafkaComponents {
             String host, principal;
             if(acl_ssl != null  && acl_ssl.trim().length()>0){
                 acl_ssl = acl_ssl.trim();
-                if(acl_ssl.contains("CN") || acl_ssl.contains("cn"))
+//                if(acl_ssl.contains("CN") || acl_ssl.contains("cn"))
+                if(aclIpPrincipleType.equals(AclIPPrincipleType.PRINCIPLE.name()))
                 {
                     host = "*";
                     principal = "User:" + acl_ssl;
@@ -456,20 +459,17 @@ public class ManageKafkaComponents {
     }
 
     public synchronized String updateConsumerAcl(String topicName, String environment, String protocol, String clusterName,
-                                                 String acl_ip,
-                                    String acl_ssl, String consumerGroup, String aclOperation, String isPrefixAcl) {
-        log.info("updateConsumerAcl TopicName:{} Env:{} Protocol:{} AclIP:{} AclSSL:{} Consumergroup:{} AclOperation:{} PrefixAcl{}",
+                                                 String acl_ip, String acl_ssl, String consumerGroup, String aclOperation,
+                                                 String isPrefixAcl, String aclIpPrincipleType) {
+        log.info("updateConsumerAcl TopicName:{} Env:{} Protocol:{} AclIP:{} AclSSL:{} Consumergroup:{}" +
+                        " AclOperation:{} PrefixAcl {} aclIpPrincipleType {}",
                 topicName, environment, protocol, acl_ip,
-                acl_ssl, consumerGroup, aclOperation, isPrefixAcl);
+                acl_ssl, consumerGroup, aclOperation, isPrefixAcl, aclIpPrincipleType);
         AdminClient client;
         String resultStr = "";
         try {
-
             PatternType patternType;
-//            if(isPrefixAcl.equals("true"))
-//                patternType = PatternType.PREFIXED;
-//            else
-                patternType = PatternType.LITERAL;
+            patternType = PatternType.LITERAL;
 
             client = getAdminClient.getAdminClient(environment, protocol, clusterName);
             if(client == null)
@@ -479,15 +479,15 @@ public class ManageKafkaComponents {
             boolean isValidParam = false;
 
             if(acl_ssl != null && acl_ssl.trim().length() > 0 && !acl_ssl.equals("User:*")){
-                acl_ssl=acl_ssl.trim();
+                acl_ssl = acl_ssl.trim();
 
-                if(acl_ssl.toLowerCase().startsWith("cn"))
+//                if(acl_ssl.toLowerCase().startsWith("cn"))
+                if(aclIpPrincipleType.equals(AclIPPrincipleType.PRINCIPLE.name()))
                 {
                     host = "*";
                     principal = "User:"+acl_ssl;
                     isValidParam = true;
                 }
-
 
                 if(aclOperation.equals("Create") && isValidParam){
                     List<AclBinding> aclListArray = new ArrayList<>();

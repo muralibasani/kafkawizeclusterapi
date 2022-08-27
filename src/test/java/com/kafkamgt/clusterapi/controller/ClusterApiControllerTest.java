@@ -2,6 +2,7 @@ package com.kafkamgt.clusterapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kafkamgt.clusterapi.UtilMethods;
+import com.kafkamgt.clusterapi.models.AclIPPrincipleType;
 import com.kafkamgt.clusterapi.services.ManageKafkaComponents;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
@@ -145,7 +146,7 @@ public class ClusterApiControllerTest {
         when(manageKafkaComponents.updateProducerAcl(topicRequest.get("topicName").get(0),
                 topicRequest.get("env").get(0), topicRequest.get("protocol").get(0), topicRequest.get("clusterName").get(0),
                 topicRequest.get("acl_ip").get(0),topicRequest.get("acl_ssl").get(0),
-                "Create", "false", null)).thenReturn("success");
+                "Create", "false", null, AclIPPrincipleType.PRINCIPLE.name())).thenReturn("success");
 
         String response = mvc.perform(MockMvcRequestBuilders
                 .post("/topics/createAcls")
@@ -172,7 +173,7 @@ public class ClusterApiControllerTest {
                 topicRequest.get("acl_ip").get(0),
                 topicRequest.get("acl_ssl").get(0),
                 topicRequest.get("consumerGroup").get(0),
-                "Create","false"))
+                "Create","false", AclIPPrincipleType.PRINCIPLE.name()))
                 .thenReturn("success1");
 
         String response = mvc.perform(MockMvcRequestBuilders
@@ -199,7 +200,7 @@ public class ClusterApiControllerTest {
                 topicRequest.get("acl_ip").get(0),
                 topicRequest.get("acl_ssl").get(0),
                 topicRequest.get("consumerGroup").get(0),
-                "Create", "false"))
+                "Create", "false", AclIPPrincipleType.PRINCIPLE.name()))
                 .thenThrow(new RuntimeException("Error creating acls"));
 
         String response = mvc.perform(MockMvcRequestBuilders
