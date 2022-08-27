@@ -1,6 +1,7 @@
 package com.kafkamgt.clusterapi.services;
 
 import com.kafkamgt.clusterapi.UtilMethods;
+import com.kafkamgt.clusterapi.models.AclIPPrincipleType;
 import com.kafkamgt.clusterapi.utils.AdminClientUtils;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.KafkaFuture;
@@ -241,7 +242,7 @@ public class ManageKafkaComponentsTest {
         when(adminClient.createAcls(any())).thenReturn(createAclsResult);
 
         String result = manageKafkaComponents.updateProducerAcl(topicName, environment, protocol,"",
-                acl_ip, null,"Create", "false", "");
+                acl_ip, null,"Create", "false", "", AclIPPrincipleType.PRINCIPLE.name());
         assertEquals("success", result);
     }
 
@@ -254,7 +255,7 @@ public class ManageKafkaComponentsTest {
         when(adminClient.createAcls(any())).thenReturn(createAclsResult);
 
         String result = manageKafkaComponents.updateProducerAcl(topicName, environment,"PLAINTEXT","",
-                null, acl_ssl,"Create", "false", "");
+                null, acl_ssl,"Create", "false", "", AclIPPrincipleType.PRINCIPLE.name());
         assertEquals("success", result);
     }
 
@@ -267,7 +268,7 @@ public class ManageKafkaComponentsTest {
         when(adminClient.createAcls(any())).thenReturn(createAclsResult);
 
         String result = manageKafkaComponents.updateConsumerAcl(topicName, environment,"PLAINTEXT","",
-                acl_ip, null, consumerGroup,"Create", "false");
+                acl_ip, null, consumerGroup,"Create", "false", AclIPPrincipleType.PRINCIPLE.name());
         assertEquals("success", result);
     }
 
@@ -280,7 +281,7 @@ public class ManageKafkaComponentsTest {
         when(adminClient.createAcls(any())).thenReturn(createAclsResult);
 
         String result = manageKafkaComponents.updateConsumerAcl(topicName, environment,"PLAINTEXT","",
-                null, acl_ssl, consumerGroup,"Create", "false");
+                null, acl_ssl, consumerGroup,"Create", "false", AclIPPrincipleType.PRINCIPLE.name());
         assertEquals("success", result);
     }
 

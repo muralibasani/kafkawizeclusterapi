@@ -143,7 +143,8 @@ public class ClusterApiController {
                 result = manageKafkaComponents.updateProducerAcl(aclRequest.get("topicName").get(0),
                         aclRequest.get("env").get(0), aclRequest.get("protocol").get(0), aclRequest.get("clusterName").get(0),
                         aclRequest.get("acl_ip").get(0), aclRequest.get("acl_ssl").get(0), "Create",
-                        aclRequest.get("isPrefixAcl").get(0), aclRequest.get("transactionalId").get(0));
+                        aclRequest.get("isPrefixAcl").get(0), aclRequest.get("transactionalId").get(0),
+                        aclRequest.get("aclIpPrincipleType").get(0));
             else
                 result = manageKafkaComponents.updateConsumerAcl(aclRequest.get("topicName").get(0),
                         aclRequest.get("env").get(0),
@@ -153,7 +154,8 @@ public class ClusterApiController {
                         aclRequest.get("acl_ssl").get(0),
                         aclRequest.get("consumerGroup").get(0),
                         "Create",
-                        aclRequest.get("isPrefixAcl").get(0));
+                        aclRequest.get("isPrefixAcl").get(0),
+                        aclRequest.get("aclIpPrincipleType").get(0));
 
             return new ResponseEntity<>(result, HttpStatus.OK);
         }catch(Exception e){
@@ -173,7 +175,8 @@ public class ClusterApiController {
                         aclRequest.get("protocol").get(0),
                         aclRequest.get("clusterName").get(0),
                         aclRequest.get("acl_ip").get(0), aclRequest.get("acl_ssl").get(0), "Delete",
-                        aclRequest.get("isPrefixAcl").get(0), aclRequest.get("transactionalId").get(0));
+                        aclRequest.get("isPrefixAcl").get(0), aclRequest.get("transactionalId").get(0),
+                        aclRequest.get("aclIpPrincipleType").get(0));
             else
                 result = manageKafkaComponents.updateConsumerAcl(aclRequest.get("topicName").get(0),
                         aclRequest.get("env").get(0),
@@ -183,7 +186,8 @@ public class ClusterApiController {
                         aclRequest.get("acl_ssl").get(0),
                         aclRequest.get("consumerGroup").get(0),
                         "Delete",
-                        aclRequest.get("isPrefixAcl").get(0));
+                        aclRequest.get("isPrefixAcl").get(0),
+                        aclRequest.get("aclIpPrincipleType").get(0));
 
             return new ResponseEntity<>(result, HttpStatus.OK);
         }catch(Exception e){
