@@ -1,3 +1,9 @@
+5.0.1
+
+Acls accepting usernames (plain text principles) and CN strings
+
+-----------------------------------
 5.0.0 changes
 
 All changes of kafkawize pro
+
